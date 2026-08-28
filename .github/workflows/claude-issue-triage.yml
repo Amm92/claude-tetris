@@ -1,0 +1,59 @@
+name: Claude Issue Triage
+
+on:
+  issues:
+    types: [opened, edited]
+
+jobs:
+  triage:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Run Claude Issue Triage
+        id: claude-triage
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: '--allowedTools "Bash(gh issue view:*),Bash(gh label list:*),Bash(gh issue edit:*),Bash(gh issue comment:*),Read,Grep,Glob"'
+          prompt: |
+            Estás analizando el issue #${{ github.event.issue.number }} de este repositorio
+            (un Tetris en JavaScript vanilla + HTML5 Canvas, sin build ni tests — ver CLAUDE.md).
+
+            Pasos a seguir:
+
+            1. Lee el issue completo con:
+               gh issue view ${{ github.event.issue.number }} --json title,body,comments
+
+            2. Lista los labels existentes del repo con:
+               gh label list
+               Usa SOLO labels de esa lista — nunca crees labels nuevos.
+
+            3. Si el issue describe un bug o comportamiento del juego, inspecciona el código
+               relevante (game.js, index.html, style.css) para fundamentar el diagnóstico con
+               nombres concretos de función/archivo (ej. collide, tryRotate, clearLines, loop,
+               spawn, lockPiece).
+
+            4. Aplica los labels apropiados (puedes elegir varios) con:
+               gh issue edit ${{ github.event.issue.number }} --add-label "label1,label2"
+
+            5. Publica UN comentario de diagnóstico en español con:
+               gh issue comment ${{ github.event.issue.number }} --body "..."
+
+               El comentario debe incluir:
+               - Resumen breve del problema/solicitud.
+               - Diagnóstico técnico: causa probable, referenciando archivo/función concreta
+                 cuando aplique.
+               - Próximos pasos sugeridos para implementar la solución (sin implementarla tú
+                 en este workflow).
+
+            No modifiques el título ni el cuerpo del issue. No hagas commits ni PRs. Tu única
+            salida son los labels añadidos y el comentario de diagnóstico.
