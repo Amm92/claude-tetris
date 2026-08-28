@@ -6,14 +6,18 @@
   <title>Tetris</title>
   <link rel="stylesheet" href="style.css" />
   <script>
-    if (localStorage.getItem('theme') === 'light') {
-      document.documentElement.setAttribute('data-theme', 'light');
+    try {
+      if (localStorage.getItem('theme') === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    } catch (e) {
+      // localStorage puede lanzar en contextos restringidos (p.ej. abrir el archivo directo en algunos navegadores)
     }
   </script>
 </head>
 <body>
-  <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema" title="Cambiar tema">🌙</button>
   <div class="wrapper">
+    <button id="theme-toggle" class="theme-toggle" aria-label="Cambiar tema" title="Cambiar tema">🌙</button>
     <h1 class="game-title">TETRIS</h1>
     <div class="game-container">
       <canvas id="board" width="300" height="600"></canvas>

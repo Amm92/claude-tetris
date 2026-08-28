@@ -48,6 +48,22 @@ function getGridColor() {
   return getComputedStyle(document.documentElement).getPropertyValue('--grid-line').trim();
 }
 
+function readStoredTheme() {
+  try {
+    return localStorage.getItem('theme');
+  } catch (e) {
+    return null;
+  }
+}
+
+function storeTheme(theme) {
+  try {
+    localStorage.setItem('theme', theme);
+  } catch (e) {
+    // localStorage puede no estar disponible (modo privado, file://, etc.); el tema igual se aplica en memoria
+  }
+}
+
 function applyTheme(theme) {
   if (theme === 'light') {
     document.documentElement.setAttribute('data-theme', 'light');
@@ -61,9 +77,9 @@ function applyTheme(theme) {
 
 function toggleTheme() {
   const isLight = document.documentElement.getAttribute('data-theme') === 'light';
-  const next = isLight ? 'dark' : 'light';
-  localStorage.setItem('theme', next);
-  applyTheme(next);
+  const nextTheme = isLight ? 'dark' : 'light';
+  applyTheme(nextTheme);
+  storeTheme(nextTheme);
 }
 
 function createBoard() {
@@ -326,5 +342,5 @@ document.addEventListener('keydown', e => {
 restartBtn.addEventListener('click', init);
 themeToggleBtn.addEventListener('click', toggleTheme);
 
-applyTheme(localStorage.getItem('theme') === 'light' ? 'light' : 'dark');
+applyTheme(readStoredTheme() === 'light' ? 'light' : 'dark');
 init();
