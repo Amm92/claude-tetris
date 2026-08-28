@@ -48,6 +48,11 @@ jobs:
             5. Publica UN comentario de diagnóstico en español con:
                gh issue comment ${{ github.event.issue.number }} --body "..."
 
+               El comentario debe estar redactado en formato Markdown válido y
+               bien estructurado (encabezados, listas, bloques de código con
+               \`\`\` cuando cites código) para que sea legible tanto por
+               humanos como por Claude.
+
                El comentario debe incluir:
                - Resumen breve del problema/solicitud.
                - Diagnóstico técnico: causa probable, referenciando archivo/función concreta
