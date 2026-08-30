@@ -28,6 +28,57 @@ const PIECES = [
 
 const LINE_SCORES = [0, 100, 300, 500, 800];
 
+// Skins visuales del tablero: paleta de colores por tipo de pieza (mismo
+// shape que COLORS), fondo/grid del canvas y flags de efecto de dibujo.
+// `background`/`grid` en null significa "usar el valor dinámico de la UI
+// actual" (CSS var --grid-line / fondo del panel), para que el skin Retro
+// se comporte exactamente igual que antes de esta feature, incluso con el
+// toggle de modo oscuro/claro.
+const SKINS = {
+  retro: {
+    label: 'Retro',
+    colors: COLORS.slice(),
+    background: null,
+    grid: null,
+    highlight: true,
+    glow: false,
+    rounded: false,
+    bevel: false,
+  },
+  neon: {
+    label: 'Neón',
+    colors: [null, '#00e5ff', '#fff176', '#e040fb', '#69f0ae', '#ff1744', '#2979ff', '#ffab40'],
+    background: '#000000',
+    grid: '#111111',
+    highlight: false,
+    glow: true,
+    rounded: false,
+    bevel: false,
+  },
+  pastel: {
+    label: 'Pastel',
+    colors: [null, '#b3e5fc', '#fff9c4', '#e1bee7', '#c8e6c9', '#ffcdd2', '#bbdefb', '#ffe0b2'],
+    background: '#fdfaf6',
+    grid: '#ece6df',
+    highlight: false,
+    glow: false,
+    rounded: true,
+    bevel: false,
+  },
+  pixel: {
+    label: 'Pixel Art',
+    colors: COLORS.slice(),
+    background: '#12121a',
+    grid: '#2a2a3a',
+    highlight: false,
+    glow: false,
+    rounded: false,
+    bevel: true,
+  },
+};
+
+let currentSkin = SKINS.retro;
+
 const canvas = document.getElementById('board');
 const ctx = canvas.getContext('2d');
 const nextCanvas = document.getElementById('next-canvas');
@@ -40,6 +91,7 @@ const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 const themeToggleBtn = document.getElementById('theme-toggle');
+const skinSelect = document.getElementById('skin-select');
 const recordsListEl = document.getElementById('records-list');
 const overlayRecordsListEl = document.getElementById('overlay-records-list');
 const overlayRecordsSection = document.getElementById('overlay-records-section');
@@ -238,6 +290,43 @@ function getDropInterval(lvl) {
   return Math.max(100, 1000 - (lvl - 1) * 90);
 }
 
+function resolveSkinName(name) {
+  return SKINS[name] ? name : 'retro';
+}
+
+function readStoredSkin() {
+  try {
+    return localStorage.getItem('skin');
+  } catch (e) {
+    return null;
+  }
+}
+
+function storeSkin(name) {
+  try {
+    localStorage.setItem('skin', name);
+  } catch (e) {
+    // localStorage puede no estar disponible (modo privado, file://, etc.); el skin igual se aplica en memoria
+  }
+}
+
+// Solo asigna currentSkin en memoria, sin redibujar. Se usa en la carga
+// inicial, ANTES de que init() haya corrido, porque draw()/drawNext()
+// dependen de `current`/`next`/`ghostY()` que todavía no existen.
+function setSkin(name) {
+  currentSkin = SKINS[resolveSkinName(name)];
+}
+
+// Aplica y persiste el skin, y redibuja. Solo debe dispararse desde el
+// evento 'change' del selector, momento en el que el juego ya arrancó.
+function applySkin(name) {
+  const resolved = resolveSkinName(name);
+  setSkin(resolved);
+  storeSkin(resolved);
+  draw();
+  drawNext();
+}
+
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
 }
@@ -361,18 +450,52 @@ function updateHUD() {
 
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
-  const color = COLORS[colorIndex];
+  const skin = currentSkin;
+  const color = skin.colors[colorIndex] || COLORS[colorIndex];
+  const px = x * size + 1;
+  const py = y * size + 1;
+  const s = size - 2;
+
+  context.save();
   context.globalAlpha = alpha ?? 1;
+
+  if (skin.glow) {
+    context.shadowBlur = size * 0.6;
+    context.shadowColor = color;
+  }
+
   context.fillStyle = color;
-  context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-  // highlight
-  context.fillStyle = 'rgba(255,255,255,0.12)';
-  context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
-  context.globalAlpha = 1;
+  if (skin.rounded && typeof context.roundRect === 'function') {
+    context.beginPath();
+    context.roundRect(px, py, s, s, Math.min(6, s / 4));
+    context.fill();
+  } else {
+    context.fillRect(px, py, s, s);
+  }
+
+  // Los overlays (highlight/bisel) no deben heredar el glow del relleno.
+  context.shadowBlur = 0;
+
+  if (skin.highlight) {
+    context.fillStyle = 'rgba(255,255,255,0.12)';
+    context.fillRect(px, py, s, 4);
+  }
+
+  if (skin.bevel) {
+    context.fillStyle = 'rgba(255,255,255,0.28)';
+    context.fillRect(px, py, s, 3);
+    context.fillRect(px, py, 3, s);
+    context.fillStyle = 'rgba(0,0,0,0.35)';
+    context.fillRect(px, py + s - 3, s, 3);
+    context.fillRect(px + s - 3, py, 3, s);
+  }
+
+  context.restore();
 }
 
 function drawGrid() {
-  ctx.strokeStyle = gridColor;
+  const skin = currentSkin;
+  ctx.strokeStyle = skin.grid || gridColor;
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -389,7 +512,12 @@ function drawGrid() {
 }
 
 function draw() {
+  const skin = currentSkin;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (skin.background) {
+    ctx.fillStyle = skin.background;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
   drawGrid();
 
   // board
@@ -412,7 +540,12 @@ function draw() {
 
 function drawNext() {
   const NB = 30;
+  const skin = currentSkin;
   nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+  if (skin.background) {
+    nextCtx.fillStyle = skin.background;
+    nextCtx.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+  }
   const shape = next.shape;
   const offX = Math.floor((4 - shape[0].length) / 2);
   const offY = Math.floor((4 - shape.length) / 2);
@@ -572,6 +705,17 @@ startLevelSelect.addEventListener('change', () => {
   startLevel = Number.isFinite(val) ? Math.min(10, Math.max(1, val)) : 1;
   storeStartLevel(startLevel);
 });
+
+// Asignación inicial del skin: silenciosa (sin redibujar), porque el juego
+// (current/next/ghostY) todavía no existe en este punto. El cambio "en
+// caliente" con persistencia y redibujado solo ocurre en el listener
+// 'change' de abajo, que se dispara después de init().
+const initialSkinName = resolveSkinName(readStoredSkin());
+setSkin(initialSkinName);
+if (skinSelect) {
+  skinSelect.value = initialSkinName;
+  skinSelect.addEventListener('change', () => applySkin(skinSelect.value));
+}
 
 applyTheme(readStoredTheme() === 'light' ? 'light' : 'dark');
 startLevel = readStoredStartLevel();
