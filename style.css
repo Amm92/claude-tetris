@@ -150,6 +150,24 @@ body {
   border-radius: 4px;
 }
 
+/* ---- Selector de skin ---- */
+#skin-select {
+  background: var(--kbd-bg);
+  color: var(--text);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  width: 100%;
+}
+
+#skin-select:focus {
+  outline: none;
+  border-color: var(--value-color);
+}
+
 /* ---- Controles ---- */
 .controls ul {
   list-style: none;
