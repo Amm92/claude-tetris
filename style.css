@@ -150,6 +150,26 @@ body {
   border-radius: 4px;
 }
 
+.skin-select {
+  background: var(--kbd-bg);
+  color: var(--text);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 5px 6px;
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.skin-select:hover {
+  border-color: var(--value-color);
+}
+
+.skin-select:focus {
+  outline: 2px solid var(--value-color);
+  outline-offset: 1px;
+}
+
 /* ---- Controles ---- */
 .controls ul {
   list-style: none;
