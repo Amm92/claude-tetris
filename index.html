@@ -48,17 +48,43 @@
             <li><kbd>↑</kbd> rotar</li>
             <li><kbd>↓</kbd> bajar</li>
             <li><kbd>Space</kbd> caída</li>
-            <li><kbd>P</kbd> pausa</li>
+            <li><kbd>P</kbd><kbd>Esc</kbd> pausa</li>
           </ul>
         </div>
       </aside>
     </div>
 
     <div id="overlay" class="overlay hidden">
-      <div class="overlay-box">
+      <div class="overlay-box" id="gameover-box">
         <p id="overlay-title">GAME OVER</p>
         <p id="overlay-score"></p>
         <button id="restart-btn">Reiniciar</button>
+      </div>
+
+      <div class="pause-menu hidden" id="pause-menu">
+        <p class="pause-menu-title">PAUSA</p>
+
+        <div class="pause-menu-actions">
+          <button id="resume-btn">Reanudar</button>
+          <button id="pause-restart-btn">Reiniciar</button>
+          <button id="controls-btn">Ver controles</button>
+        </div>
+
+        <div class="pause-controls hidden" id="pause-controls">
+          <ul>
+            <li><kbd>←</kbd><kbd>→</kbd> mover</li>
+            <li><kbd>↑</kbd><kbd>X</kbd> rotar</li>
+            <li><kbd>↓</kbd> bajar (soft drop)</li>
+            <li><kbd>Space</kbd> caída (hard drop)</li>
+            <li><kbd>P</kbd><kbd>Esc</kbd> pausa</li>
+          </ul>
+        </div>
+
+        <div class="start-level">
+          <label for="start-level-select">Nivel inicial</label>
+          <select id="start-level-select"></select>
+          <span class="start-level-hint">Se aplica en la próxima partida</span>
+        </div>
       </div>
     </div>
   </div>

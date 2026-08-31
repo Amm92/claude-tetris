@@ -230,3 +230,100 @@ kbd {
 #restart-btn:hover {
   background: var(--btn-hover-bg);
 }
+
+/* ---- Menú de pausa ---- */
+.pause-menu {
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+.pause-menu.hidden,
+.pause-controls.hidden {
+  display: none;
+}
+
+.pause-menu-title {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: var(--title-color);
+}
+
+.pause-menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pause-menu-actions button {
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  border: none;
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.pause-menu-actions button:hover {
+  background: var(--btn-hover-bg);
+}
+
+.pause-controls ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 4px;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.pause-controls li {
+  font-size: 12px;
+  color: var(--control-text);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.start-level {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.start-level label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--label-color);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+#start-level-select {
+  background: var(--kbd-bg);
+  color: var(--text);
+  border: 1px solid var(--kbd-border);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.start-level-hint {
+  font-size: 10px;
+  color: var(--control-text);
+}
