@@ -58,7 +58,28 @@
       <div class="overlay-box" id="gameover-box">
         <p id="overlay-title">GAME OVER</p>
         <p id="overlay-score"></p>
-        <button id="restart-btn">Reiniciar</button>
+
+        <form id="name-form" class="name-form hidden">
+          <label for="player-name">¡Entras en el top! Escribe tu nombre:</label>
+          <div class="name-form-row">
+            <input id="player-name" type="text" maxlength="12" autocomplete="off" placeholder="Jugador" />
+            <button type="submit" id="save-score-btn">Guardar</button>
+          </div>
+        </form>
+
+        <div id="records-box" class="records">
+          <div class="records-header">
+            <span class="label">RECORDS</span>
+            <button id="reset-records-btn" type="button">Resetear</button>
+          </div>
+          <ol id="records-list" class="records-list"></ol>
+          <div class="records-extra">
+            <span>Mejor combo: <strong id="rec-combo">0</strong></span>
+            <span>Líneas máx.: <strong id="rec-maxlines">0</strong></span>
+          </div>
+        </div>
+
+        <button id="restart-btn">Jugar</button>
       </div>
 
       <div class="pause-menu hidden" id="pause-menu">
